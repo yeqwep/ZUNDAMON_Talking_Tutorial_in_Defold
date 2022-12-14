@@ -1,0 +1,49 @@
+local talk = require("main.scripts.libs.talk")
+-- ------------------------------------------------------------------------------------------
+-- 表示変更
+-- ------------------------------------------------------------------------------------------
+-- クリック可能なのを知らせるマークを右下に表示させるかどうか
+local function push_mark(self, ok)
+	--プッシュマーク表示、アニメ開始
+	if ok then
+		gui.set_enabled(self.p_mark, true)
+		local y = self.p_mark_pos.y - 10
+		gui.animate(self.p_mark, 'position.y', y, gui.EASING_INSINE, 0.6, 0, nil, gui.PLAYBACK_LOOP_PINGPONG)
+	else
+		--プッシュマーク非表示、位置初期化
+		gui.cancel_animation(self.p_mark, 'position.y')
+		gui.set_position(self.p_mark, self.p_mark_pos)
+		gui.set_enabled(self.p_mark, false)
+	end
+end
+-- ------------------------------------------------------------------------------------------
+-- 基本
+-- ------------------------------------------------------------------------------------------
+function init(self)
+	-- nodeを取得
+	self.window = gui.get_node("window")
+	self.textline = gui.get_node("textline")
+	self.p_mark = gui.get_node("p_mark")
+
+	self.p_mark_pos = gui.get_position(self.p_mark)	-- プッシュマークの初期位置
+	-- 非表示にする
+	msg.post(".","hide")
+	push_mark(self, false)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("next") then
+		gui.set_enabled(self.window,true)
+		gui.set_enabled(self.textline,true)
+		gui.set_text(self.textline, talk.text[message.paragraph])
+		push_mark(self,false)
+	elseif message_id == hash("show_mark") then
+		push_mark(self,true)
+	elseif message_id == hash("show") then
+		gui.set_enabled(self.window,true)
+		gui.set_enabled(self.textline,true)
+	elseif message_id == hash("hide") then
+		gui.set_enabled(self.window,false)
+		gui.set_enabled(self.textline,false)
+	end
+end

@@ -1,0 +1,29 @@
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /builtins/render/default.renderc
+
+[script]
+shared_state = 1
+
+[display]
+width = 1280
+height = 720
+
+[android]
+input_method = HiddenInputField
+
+[project]
+title = ZUNDAMON_Talking_Tutorial
+dependencies#0 = https://github.com/indiesoftby/defold-sharp-sprite/archive/main.zip
+
+[graphics]
+default_texture_min_filter = nearest
+default_texture_mag_filter = nearest
+
+[sound]
+max_sound_data = 1024
+max_sound_instances = 1024
+max_component_count = 128
+max_sound_sources = 128
+max_sound_buffers = 128
+

@@ -1,0 +1,97 @@
+-- スライドの切り替えテーブル
+-- ファイル名のスライドに切り替える
+-- falseのとき表示しない
+local show_table = {
+	"p1",
+	"p2",
+	"p3",
+	"p4_2",
+	"p4",
+	"p5",
+	"p5",
+	"p6",
+	"p4_2",
+	"p7",
+	"p8",
+	"p110",
+	"p11",
+	"p8",
+	"import",
+	"p14",
+	"p16",
+	"p18",
+	false,
+	false,
+	"p19",
+	"p19",
+	"p19",
+	"p22",
+	"p15",
+	"p20",
+	"p17",
+	"p21",
+	"p28",
+	"p28",
+	"p28",
+	"p29",
+	"p30",
+	false,
+	false,
+	false,
+	false,
+	false,
+	"pend",
+}
+-- ------------------------------------------------------------------------------------------
+-- ボタン操作
+-- ------------------------------------------------------------------------------------------
+local s_button = require "main.scripts.libs.simple_button"
+
+local box_button = nil
+
+local function setup_button(self)
+	box_button = s_button.create(self.box, function()
+		msg.post(".","reset")
+		msg.post("/player#player","reset")
+		box_button.reset()
+	end)
+end
+-- ------------------------------------------------------------------------------------------
+-- 基本
+-- ------------------------------------------------------------------------------------------
+function init(self)
+	gui.set_render_order(9)
+	self.box = gui.get_node("box")
+	setup_button(self)
+	msg.post(".","reset")
+	msg.post("#", "acquire_input_focus")
+end
+
+function on_input(self, action_id, action)
+	if self.button_push then
+		box_button.on_input(action_id, action)
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("next") then
+		if message.paragraph then
+			if message.paragraph >= #show_table then
+				gui.set_enabled(self.box,true)
+				gui.play_flipbook(self.box, "pend")
+				self.button_push = true
+			else
+				if show_table[message.paragraph] then
+					local slide = show_table[message.paragraph]
+					gui.set_enabled(self.box,true)
+					gui.play_flipbook(self.box, slide)
+				else 
+					gui.set_enabled(self.box,false)
+				end
+			end
+		end
+	elseif message_id == hash("reset") then
+		self.button_push = false
+		gui.set_enabled(self.box,true)
+	end
+end

@@ -1,0 +1,129 @@
+local M = {}
+M.VERBOSE = false
+
+local function sound_template(path)
+return
+[[sound: "]] .. path .. [["
+looping: 0
+group: "master"
+gain: 1.0
+pan: 0.0
+speed: 1.0]]
+end
+
+local function sound_go_components(path, id)
+    return
+[[
+    embedded_components {
+        id: "]] .. id .. [["
+        type: "sound"
+        data: "sound: \"/]] .. path .. [[\"\n"
+        "looping: 0\n"
+        "group: \"master\"\n"
+        "gain: 1.0\n"
+        "pan: 0.0\n"
+        "speed: 1.0\n"
+        "loopcount: 0\n"
+        ""
+        position {
+          x: 0.0
+          y: 0.0
+          z: 0.0
+        }
+        rotation {
+          x: 0.0
+          y: 0.0
+          z: 0.0
+          w: 1.0
+        }
+    }
+]]
+end
+local function file_exists(name)
+    local f=io.open(name,"r")
+    if f~=nil then io.close(f) return true else return false end
+end
+
+local function get_filename(path)   
+    local main, file_name, extension = path:match("(.-)([^\\/]-%.?([^%.\\/]*))$")
+    return main, file_name
+end
+
+local function is_audio(node_id)
+    local path = editor.get(node_id, "path")
+    return path:find(".ogg", nil, true) or path:find(".wav", nil, true)
+end
+
+local function name_ext(file_name)
+    return string.match(file_name, "(.+)%..+")
+end
+
+local function make_sound_go(main, file_name)
+    local target_path = "." .. main .. "sound.go"
+    local name = name_ext(file_name)
+    local file = sound_go_components(main .. file_name, name)
+    local sound_go = io.open(target_path, "a+")
+    sound_go:write(file)
+    sound_go:close()
+end
+
+local function make_audio_component(opts)
+	if M.VERBOSE then print("Create Sound Components: Run") end
+	local base_path = get_filename(editor.get(opts.selection[1], "path"))
+	local target_path = "." .. base_path .. "sound.go"
+    local sound_go = io.open(target_path, "w")
+    sound_go:write()
+    sound_go:close()
+	for _, node_id in ipairs(opts.selection) do
+		local path = editor.get(node_id, "path")
+		local main, file_name = get_filename(path)
+		if M.VERBOSE then print("path: ", path) end
+		make_sound_go(main, file_name)
+	end
+end
+
+
+function M.get_commands()
+    return {
+        {
+            label = "Create Sound Component",
+            locations = {"Assets"},
+            query = {
+                selection = { type = "resource", cardinality = "one" }
+            },
+            active = function(opts)
+                if not is_audio(opts.selection) then
+                    return false
+                end
+                return true
+            end,
+            run = function(opts)
+                if M.VERBOSE then print("Create Sound Component: Run") end
+                local path = editor.get(opts.selection, "path")
+                if M.VERBOSE then print("path: ", path) end
+                make_audio_component(path)
+            end,
+        },
+        {
+            label = "Create Sound Components",
+            locations = {"Assets"},
+            query = {
+                selection = { type = "resource", cardinality = "many" }
+            },
+            active = function(opts)
+                local count = 0
+                for _, node_id in ipairs(opts.selection) do
+                    count = count + 1
+                    if not is_audio(node_id) then
+                        return false
+                    end
+                end
+                if count <= 1 then return false end
+                return true
+            end,
+            run = make_audio_component
+        },
+    }
+end
+
+return M

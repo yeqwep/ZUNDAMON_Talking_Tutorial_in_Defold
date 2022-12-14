@@ -1,0 +1,150 @@
+-- ------------------------------------------------------------------------------------------
+-- リップシンク
+-- -----------------------------------------------------------------------------------
+local function kuti(self,katati,lip_scale,eye_scale,lip_pos,mayu_pos,body_scale)
+	go.set(self.lip,"scale",lip_scale)
+	sprite.play_flipbook(self.lip, katati)
+	go.set_position(lip_pos, self.lip)
+	if not self.anim then
+		go.set_position(mayu_pos, self.mayu_go)
+		go.set(self.eye,"scale",eye_scale)
+	end
+	go.set(self.body_go,"scale",body_scale)
+	return false
+end
+-- ------------------------------------------------------------------------------------------
+-- リアクション
+-- -----------------------------------------------------------------------------------
+-- まばたき
+local function patipati(self)
+	self.anim = true
+	go.animate(self.eye, "scale", go.PLAYBACK_ONCE_FORWARD, vmath.vector3(1,0.5,1), go.EASING_INCUBIC, 0.09, 0, function()
+		msg.post(self.eye, "disable")
+		sprite.play_flipbook(self.eyelid, "eyelid_nagomi")
+		local mayu_pos = vmath.vector3(self.mayu_pos.x,self.mayu_pos.y - 10,self.mayu_pos.z)
+		go.set_position(mayu_pos, self.mayu)
+		go.set(self.eye,"scale",vmath.vector3(1))
+		go.set(self.eyelid,"scale",vmath.vector3(1))
+		timer.delay(0.25, false, function()
+			go.set_position(self.eyelid_pos,self.eyelid_go)
+			msg.post(self.eye, "enable")
+			sprite.play_flipbook(self.eyelid, "sirome")
+			local mayu_pos = vmath.vector3(self.mayu_pos.x,self.mayu_pos.y,self.mayu_pos.z)
+			go.set_position(mayu_pos, self.mayu)
+
+			self.anim = false
+			local t = math.random(1,8)
+			t = t * 0.5
+			timer.delay(t, false, patipati)
+		end)
+	end)
+	go.animate(self.eyelid, "scale", go.PLAYBACK_ONCE_FORWARD, vmath.vector3(1,0.5,1), go.EASING_INCUBIC, 0.09, 0)
+	local y = self.eyelid_pos.y - 20
+	go.animate(self.eyelid_go, "position.y", go.PLAYBACK_ONCE_FORWARD, y, go.EASING_INCUBIC, 0.09,0)
+end
+-- ゆらぎ
+local function yurari(self)
+	local t = math.random(3,6) * 0.4
+	local wait = math.random(1,5) * 0.4
+	local pos = self.body_pos
+	local y = pos.y - 3
+	go.animate(self.body_go, "position.y", go.PLAYBACK_ONCE_PINGPONG, y, go.EASING_INOUTQUAD, t, wait, function()
+		yurari(self)
+	end)
+	local r = math.random(-3,3) * 0.007
+	go.animate(self.body_go, "rotation.z", go.PLAYBACK_ONCE_FORWARD, r, go.EASING_INOUTQUAD, t, wait)
+end
+-- ------------------------------------------------------------------------------------------
+-- 基本
+-- ------------------------------------------------------------------------------------------
+function init(self)
+	-- 各スプライトurl
+	self.eye = msg.url("/eye#sprite")
+	self.eyelid = msg.url("/eyelid#sprite")
+	self.lip = msg.url("/lip#sprite")
+	self.mayu = msg.url("/mayu#sprite")
+	-- ゲームオブジェクト
+	self.mayu_go = msg.url("/mayu")
+	self.body_go = msg.url("/zundamon")
+	self.eyelid_go = msg.url("/eyelid")
+	-- 位置
+	self.lip_pos = go.get_position(self.lip)
+	self.mayu_pos = go.get_position(self.mayu)
+
+	self.body_pos = go.get_position(self.body_go)
+	self.eyelid_pos = go.get_position(self.eyelid_go)
+	self.is_anim = false
+	self.ikari = false
+	local t = math.random(20,60) * 0.1
+	timer.delay(t, false, patipati)
+	yurari(self)
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("update_lip") then
+
+		local katati = "lip_a"
+		local lip_scale = vmath.vector3(0.80)
+		local eye_scale = vmath.vector3(0.99)
+		local body_scale = vmath.vector3(1)
+		local lip_pos = self.lip_pos
+		local mayu_pos = self.mayu_pos
+
+		-- めの形
+		local me = "eye_futuu"
+		if self.ikari then
+			me = "eye_oko"
+		end
+		if message.kuti == "a"   then
+			katati = "lip_a"
+			lip_scale = vmath.vector3(1.01)
+			eye_scale = vmath.vector3(0.98)
+			body_scale = vmath.vector3(1.007)
+			lip_pos = vmath.vector3(self.lip_pos.x + 0.2,self.lip_pos.y - 0.5,self.mayu_pos.z)
+			mayu_pos = vmath.vector3(self.mayu_pos.x + 0.5,self.mayu_pos.y - 0.5,self.mayu_pos.z)
+		elseif message.kuti == "u" then
+			katati = "lip_u"
+			lip_scale = vmath.vector3(0.78)
+			eye_scale = vmath.vector3(0.99)
+			body_scale = vmath.vector3(1.006)
+			lip_pos = vmath.vector3(self.lip_pos.x - 0.2,self.lip_pos.y + 0.5,self.mayu_pos.z)
+			mayu_pos = vmath.vector3(self.mayu_pos.x + 0.5,self.mayu_pos.y - 0.5,self.mayu_pos.z)
+		elseif message.kuti == "o" then
+			katati = "lip_o"
+			lip_scale = vmath.vector3(0.58)
+			eye_scale = vmath.vector3(0.95)
+			body_scale = vmath.vector3(1.006)
+			lip_pos = vmath.vector3(self.lip_pos.x + 0.5,self.lip_pos.y - 1.5,self.mayu_pos.z)
+			mayu_pos = vmath.vector3(self.mayu_pos.x + 1.5,self.mayu_pos.y - 1.5,self.mayu_pos.z)
+		elseif message.kuti == "i" then
+			katati = "lip_i"
+			lip_scale = vmath.vector3(1)
+			eye_scale = vmath.vector3(1.01)
+			body_scale = vmath.vector3(1.006)
+			lip_pos = vmath.vector3(self.lip_pos.x + 1.8,self.lip_pos.y - 1.8,self.mayu_pos.z)
+			mayu_pos = vmath.vector3(self.mayu_pos.x + 1.5,self.mayu_pos.y - 1.5,self.mayu_pos.z)
+		elseif message.kuti == "e" then
+			katati = "lip_e"
+			lip_scale = vmath.vector3(1)
+			eye_scale = vmath.vector3(0.98)
+			body_scale = vmath.vector3(1.006)
+			lip_pos = vmath.vector3(self.lip_pos.x - 0.8,self.lip_pos.y + 0.8,self.mayu_pos.z)
+			mayu_pos = vmath.vector3(self.mayu_pos.x + 0.8,self.mayu_pos.y - 0.8,self.mayu_pos.z)
+		elseif message.kuti == "N" or message.kuti == "pau" or message.kuti == "cl" then
+			katati = "lip_n2"
+			lip_scale = vmath.vector3(1)
+			eye_scale = vmath.vector3(1)
+		end
+		kuti(self,katati,lip_scale,eye_scale,lip_pos,mayu_pos,body_scale)
+		-- めの形
+		-- sprite.play_flipbook(self.eye, me)
+
+	elseif message_id == hash("syokku") then
+		self.is_anim = false
+		self.ikari = false
+		go.cancel_animations(self.eye, "scale")
+		syokku(self)
+	elseif message_id == hash("okorin") then
+		okorin(self)
+	end
+end

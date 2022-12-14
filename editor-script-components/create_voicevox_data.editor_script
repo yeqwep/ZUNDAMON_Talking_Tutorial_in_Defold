@@ -1,0 +1,90 @@
+local M = {}
+
+local function ends_with(path, suffix)
+	return path:find(suffix, nil, true) or path:find(suffix, nil, true)
+end
+
+local function path_segments(path)
+	return string.match(path, "(.-)([^\\/]-%.?([^%.\\/]*))$")
+end
+
+local function name_ext(file_name)
+	return string.match(file_name, "(.+)%..+")
+end
+
+local function remove_utf8bom(text)
+	utf8_bom = string.char(0xEF, 0xBB, 0xBF)
+	if(string.sub(text,1, 3) == utf8_bom) then
+		text = string.sub(text, 4, -1)
+		return text
+	else
+		return text
+	end
+end
+
+local function split_numstr(inputstr, sep)
+	if sep == nil then
+			sep = "%s"
+	end
+	local t="{"
+	for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+		if tonumber(str) then
+			str = tonumber(str)/10000000
+		elseif type(str) == "string" then
+			str = string.format('%q', str)
+		end
+		t = t .. str .. ","
+	end
+	t = t .. "}"
+	return t
+end
+-- ---------------------------------------------------------------------------------
+-- Lip-sync Lua table from lab
+-- ---------------------------------------------------------------------------------
+local function lab2table(opts)
+	local base_path,file_name = path_segments(editor.get(opts.selection[1], "path"))
+	local name = name_ext(file_name)
+	local exp_data = "return {"
+	for _, id in pairs(opts.selection) do
+		exp_data = exp_data .. "{"
+		local path,name = editor.get(id, "path")
+		local file = io.open("." .. path, "r")
+		for line in file:lines() do
+			line = remove_utf8bom(line)
+			exp_data = exp_data .. split_numstr(line) .. ","
+		end
+		file:close()
+		exp_data = exp_data .. "},"
+	end
+	exp_data = exp_data .. "}"
+	local exp_file = io.open("." .. base_path .. "lips.lua", "w")
+	exp_file:write(exp_data)
+	exp_file:close()
+end
+-- ---------------------------------------------------------------------------------
+-- ---------------------------------------------------------------------------------
+function M.get_commands()
+	return {
+		{
+			label="Create Table From lab...",
+			locations = {"Assets"},
+			active = function(opts)
+				for _, id in pairs(opts.selection) do
+					local path = editor.get(id, "path")
+					if ends_with(path, ".lab") then
+						return true
+					else
+						return false
+					end
+				end
+			end,
+			query = {
+				selection = {type = "resource", cardinality = "many"}
+			},
+			run = lab2table
+		},
+	}
+	
+end
+
+return M
