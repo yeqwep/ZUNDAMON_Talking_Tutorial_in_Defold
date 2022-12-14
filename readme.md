@@ -7,7 +7,7 @@
  Defold  
  https://defold.com/  
 # DEMO
- https://github.com/  
+ https://yeqwep.itch.io/zundamon-talking-tutorial  
 # Usage
  This is a tutorial for beginners.  
  Open the project file in Defold.  
