@@ -38,14 +38,18 @@ function on_input(self, action_id, action)
 			talk.next_paragraph()
 			msg.post("/gui#slide","next",{page = talk.paragraph})
 		end
+	elseif action.released and action_id == hash("esc") then
+		msg.post(".","reset")
 	end
 end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("reset") then
-		talk.reset()
-		talk.next_paragraph()
 		sound.stop("/bgm#contedefees_0001")
-		sound.play("/bgm#contedefees_0001")
+		timer.delay(0.2, false, function()
+			talk.reset()
+			talk.next_paragraph()
+			sound.play("/bgm#contedefees_0001")
+		end)
 	end
 end

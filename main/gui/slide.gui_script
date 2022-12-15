@@ -40,7 +40,7 @@ local show_table = {
 	false,
 	false,
 	false,
-	"pend",
+	"pend2",
 }
 -- ------------------------------------------------------------------------------------------
 -- ボタン操作
@@ -78,7 +78,7 @@ function on_message(self, message_id, message, sender)
 		if message.paragraph then
 			if message.paragraph >= #show_table then
 				gui.set_enabled(self.box,true)
-				gui.play_flipbook(self.box, "pend")
+				gui.play_flipbook(self.box, "pend2")
 				self.button_push = true
 			else
 				if show_table[message.paragraph] then

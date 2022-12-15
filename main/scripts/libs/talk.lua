@@ -23,7 +23,7 @@ function talk.next_paragraph()
 	-- フキダシ、スライド、音声更新
 	msg.post("/gui#fukidashi", "next", {paragraph = talk.paragraph})
 	msg.post("/gui#slide", "next", {paragraph = talk.paragraph})
-	local para = "zunda_" .. string.format( "%03d", talk.paragraph )
+	local para = "zunda" .. string.format( "%03d", talk.paragraph )
 	local s_url = "main:/sound#" .. para
 	sound.stop("main:/sound#")
 	sound.play(s_url)
