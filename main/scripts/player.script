@@ -46,7 +46,7 @@ end
 function on_message(self, message_id, message, sender)
 	if message_id == hash("reset") then
 		sound.stop("/bgm#contedefees_0001")
-		timer.delay(0.2, false, function()
+		timer.delay(1.2, false, function()
 			talk.reset()
 			talk.next_paragraph()
 			sound.play("/bgm#contedefees_0001")

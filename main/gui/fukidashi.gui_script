@@ -1,5 +1,18 @@
 local talk = require("main.scripts.libs.talk")
 -- ------------------------------------------------------------------------------------------
+-- ボタン操作
+-- ------------------------------------------------------------------------------------------
+local s_button = require "main.scripts.libs.simple_button"
+
+local lang_button = nil
+
+local function setup_button(self)
+	lang_button = s_button.create(self.lang_button, function()
+		talk.lang = (talk.lang % #talk.text) + 1
+		msg.post(".","lang_change")
+	end)
+end
+-- ------------------------------------------------------------------------------------------
 -- 表示変更
 -- ------------------------------------------------------------------------------------------
 -- クリック可能なのを知らせるマークを右下に表示させるかどうか
@@ -20,23 +33,35 @@ end
 -- 基本
 -- ------------------------------------------------------------------------------------------
 function init(self)
+	self.p = 0				-- 表示するテキスト
 	-- nodeを取得
 	self.window = gui.get_node("window")
 	self.textline = gui.get_node("textline")
 	self.p_mark = gui.get_node("p_mark")
+	self.lang_button = gui.get_node("lang_button")
 
 	self.p_mark_pos = gui.get_position(self.p_mark)	-- プッシュマークの初期位置
+
+	setup_button(self)
 	-- 非表示にする
 	msg.post(".","hide")
 	push_mark(self, false)
+	msg.post("#", "acquire_input_focus")
+end
+
+function on_input(self, action_id, action)
+	lang_button.on_input(action_id, action)
 end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("next") then
 		gui.set_enabled(self.window,true)
 		gui.set_enabled(self.textline,true)
-		gui.set_text(self.textline, talk.text[message.paragraph])
+		self.p = message.paragraph
+		gui.set_text(self.textline, talk.text[talk.lang][self.p])
 		push_mark(self,false)
+	elseif message_id == hash("lang_change") then
+		gui.set_text(self.textline, talk.text[talk.lang][self.p])
 	elseif message_id == hash("show_mark") then
 		push_mark(self,true)
 	elseif message_id == hash("show") then

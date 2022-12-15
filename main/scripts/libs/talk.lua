@@ -1,6 +1,10 @@
 local talk = {}
 local lips = require("assets.lips.lips")
-talk.text = require("assets.txt.text")
+talk.text = {
+	require("assets.txt.text"),
+	require("assets.txt.text_en"),
+}
+talk.lang = 1					-- 言語変更
 -- --------------------------------------------------------------------------------------
 -- リセット
 function talk.reset()

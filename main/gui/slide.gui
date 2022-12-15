@@ -1,4 +1,8 @@
 script: "/main/gui/slide.gui_script"
+fonts {
+  name: "koruri"
+  font: "/assets/font/koruri.font"
+}
 textures {
   name: "slide"
   texture: "/assets/atlas/slide.atlas"
