@@ -4,7 +4,7 @@
  VOICEVOX  
  https://voicevox.hiroshiba.jp/  
  *Game engine  
- Defold  
+ Defold[Ver1.4.1]  
  https://defold.com/  
 # DEMO
  https://yeqwep.itch.io/zundamon-talking-tutorial  
