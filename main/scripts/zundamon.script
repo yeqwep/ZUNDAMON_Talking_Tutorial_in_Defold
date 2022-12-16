@@ -73,8 +73,7 @@ function init(self)
 
 	self.body_pos = go.get_position(self.body_go)
 	self.eyelid_pos = go.get_position(self.eyelid_go)
-	self.is_anim = false
-	self.ikari = false
+	self.anim = false
 	local t = math.random(20,60) * 0.1
 	timer.delay(t, false, patipati)
 	yurari(self)
@@ -90,11 +89,6 @@ function on_message(self, message_id, message, sender)
 		local lip_pos = self.lip_pos
 		local mayu_pos = self.mayu_pos
 
-		-- めの形
-		local me = "eye_futuu"
-		if self.ikari then
-			me = "eye_oko"
-		end
 		if message.kuti == "a"   then
 			katati = "lip_a"
 			lip_scale = vmath.vector3(1.01)
@@ -136,15 +130,5 @@ function on_message(self, message_id, message, sender)
 			eye_scale = vmath.vector3(1)
 		end
 		kuti(self,katati,lip_scale,eye_scale,lip_pos,mayu_pos,body_scale)
-		-- めの形
-		-- sprite.play_flipbook(self.eye, me)
-
-	elseif message_id == hash("syokku") then
-		self.is_anim = false
-		self.ikari = false
-		go.cancel_animations(self.eye, "scale")
-		syokku(self)
-	elseif message_id == hash("okorin") then
-		okorin(self)
 	end
 end
