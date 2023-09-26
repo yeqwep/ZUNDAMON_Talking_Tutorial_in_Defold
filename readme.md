@@ -18,8 +18,6 @@
 # Note
  When you want to change the lip sync initial file name or directory,rewrite "talk.lua".  
 
- The editor freezes when you open a large size font in Defold.  
- You have to font edit with a text editor.  
 # Credits
  *BGM:By HiLi  
  https://conte-de-fees.com/about  
